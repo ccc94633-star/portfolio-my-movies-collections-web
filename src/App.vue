@@ -1,18 +1,167 @@
 <script setup>
+import { ref, computed } from 'vue'
+import { initialMovies } from './data/initialMovies.js'
 
+const categoryTypes = {
+    action: '動作電影',
+    drama: '劇情電影',
+    animation: '動畫電影',
+    sciFi: '科幻電影',
+    comedy: '喜劇電影',
+    other: '其他電影',
+}
+
+const collection = ref([...initialMovies])
+const category = ref('')
+const title = ref('')
+const imageUrl = ref('')
+const shortDesc = ref('')
+const rating = ref(0)
+
+const total = computed(() => collection.value.length)
+
+const ratingAvg = computed(() => {
+    if (collection.value.length === 0) return 0
+    const sum = collection.value.reduce((acc, item) => acc + item.rating, 0)
+    return (sum / collection.value.length).toFixed(1)
+})
+
+const activeFilter = ref('all')
+
+const filterResults = computed(() => {
+    if (activeFilter.value === 'all') return [...collection.value]
+    return collection.value.filter(movie => movie.category === activeFilter.value)
+})
+
+const query = (categoryType) => {
+    activeFilter.value = categoryType
+}
+
+const addCollection = () => {
+    collection.value.unshift({
+        category: category.value,
+        title: title.value,
+        imageUrl: imageUrl.value,
+        shortDesc: shortDesc.value,
+        rating: rating.value,
+    })
+    title.value = ''
+    category.value = ''
+    imageUrl.value = ''
+    shortDesc.value = ''
+    rating.value = 0
+}
 </script>
 
 <template>
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雯子的電影收藏館</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- 頂部兩欄：輸入區 + 統計區 -->
+    <div class="top-row">
+
+        <!-- 輸入區 -->
+        <section>
+            <h2>新增收藏</h2>
+
+            <label for="title" class="form-row">
+                <span class="form-label">名稱</span>
+                <input type="text" v-model="title" id="title" placeholder="請輸入名稱">
+            </label>
+
+            <label for="category" class="form-row">
+                <span class="form-label">分類</span>
+                <select id="category" v-model="category">
+                    <option value="" hidden>請選擇</option>
+                    <option v-for="(label, key) in categoryTypes" :key="key" :value="key">{{ label }}</option>
+                </select>
+            </label>
+
+            <label for="imageUrl" class="form-row">
+                <span class="form-label">圖片網址</span>
+                <input type="url" v-model="imageUrl" id="imageUrl" placeholder="請輸入圖片網址">
+            </label>
+
+            <label for="shortDesc" class="form-row">
+                <span class="form-label">簡短介紹</span>
+                <textarea id="shortDesc" v-model="shortDesc" placeholder="請輸入簡短介紹..."></textarea>
+            </label>
+
+            <div class="form-row">
+                <span class="form-label">推薦程度</span>
+                <div class="star-row">
+                    <button v-for="i in 5" :key="i" type="button" @click="rating = i">
+                        <i :class="rating >= i ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" class="btn-add" @click="addCollection">新增收藏</button>
+        </section>
+
+        <!-- 統計資訊 -->
+        <section>
+            <h2>統計資訊</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">收藏總數</div>
+                    <div class="stat-value">{{ total }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">平均推薦</div>
+                    <div class="stat-value">{{ ratingAvg }}</div>
+                </div>
+            </div>
+        </section>
+
+    </div><!-- /top-row -->
+
+
+    <!-- 收藏列表 -->
+    <section>
+        <h3>收藏列表</h3>
+
+        <nav class="filter-nav">
+            <span>分類篩選：</span>
+            <ul>
+                <li :class="{ active: activeFilter === 'all' }" @click="query('all')">全部</li>
+                <li v-for="(value, key) in categoryTypes" :key="key"
+                    :class="{ active: activeFilter === key }"
+                    @click="query(key)">{{ value }}</li>
+            </ul>
+        </nav>
+
+        <!-- 無資料提示 -->
+        <div v-if="filterResults.length === 0" class="empty-state">
+            <i class="fa-solid fa-film"></i>
+            <p>目前還沒有任何收藏項目，快來新增你的第一筆收藏吧！</p>
+        </div>
+
+        <!-- 卡片列表 -->
+        <div v-else class="cards-grid">
+            <div v-for="(item, index) in filterResults" :key="index" class="movie-card">
+
+                <div class="card-img-wrap">
+                    <img :src="item.imageUrl || 'no-image.svg'" :alt="item.title + '的圖片'"
+                        @error="$event.target.src='no-image.svg'">
+                </div>
+
+                <div class="card-body">
+                    <span class="card-category">{{ categoryTypes[item.category] || '未分類' }}</span>
+                    <div class="card-title">{{ item.title }}</div>
+                    <div class="card-desc">{{ item.shortDesc }}</div>
+                    <div class="card-stars">
+                        <i v-for="i in 5" :key="i"
+                            :class="item.rating >= i ? 'fa-solid fa-star' : 'fa-regular fa-star'">
+                        </i>
+                    </div>
+                    <button type="button" class="btn-more">顯示更多</button>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
 </template>
 
-<style scoped>
-
-
-
+<style>
 /* ========================================
    電影收藏館 — Netflix 風格主題
    ======================================== */
@@ -365,7 +514,6 @@ textarea {
     z-index: 10;
 }
 
-/* image wrapper fills the entire card */
 .card-img-wrap {
     position: absolute;
     inset: 0;
@@ -385,7 +533,6 @@ textarea {
     transform: scale(1.04);
 }
 
-/* bottom-to-top gradient over the image */
 .card-img-wrap::after {
     content: '';
     position: absolute;
@@ -409,7 +556,6 @@ textarea {
     );
 }
 
-/* card body overlays the bottom of the card */
 .card-body {
     position: absolute;
     bottom: 0;
@@ -419,7 +565,6 @@ textarea {
     z-index: 2;
 }
 
-/* category badge — always visible */
 .card-category {
     display: inline-block;
     font-size: 0.6rem;
@@ -433,7 +578,6 @@ textarea {
     text-transform: uppercase;
 }
 
-/* title — always visible */
 .card-title {
     font-size: 0.9rem;
     font-weight: 700;
@@ -443,7 +587,6 @@ textarea {
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
-/* description, stars, btn: hidden at rest → revealed on hover */
 .card-desc {
     font-size: 0.73rem;
     color: var(--text-sec);
@@ -451,6 +594,7 @@ textarea {
     margin: 8px 0;
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     opacity: 0;
@@ -485,7 +629,6 @@ textarea {
     backdrop-filter: blur(4px);
 }
 
-/* reveal on hover */
 .movie-card:hover .card-desc,
 .movie-card:hover .card-stars,
 .movie-card:hover .btn-more {
@@ -498,7 +641,6 @@ textarea {
     border-color: rgba(255, 255, 255, 0.65);
 }
 
-/* stars colour */
 .card-stars .fa-solid  { color: var(--star); }
 .card-stars .fa-regular { color: var(--text-muted); opacity: 0.35; }
 
@@ -520,5 +662,4 @@ textarea {
     letter-spacing: 0.04em;
     color: var(--text-sec);
 }
-
 </style>
