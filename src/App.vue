@@ -37,6 +37,18 @@ const query = (categoryType) => {
     activeFilter.value = categoryType
 }
 
+const movieDetailLocation = (movie) => ({
+    name: 'movie-detail',
+    params: { id: collection.value.indexOf(movie) },
+    query: {
+        title: movie.title,
+        imageUrl: movie.imageUrl,
+        shortDesc: movie.shortDesc,
+        category: movie.category,
+        rating: movie.rating,
+    },
+})
+
 const addCollection = () => {
     collection.value.unshift({
         category: category.value,
@@ -54,6 +66,7 @@ const addCollection = () => {
 </script>
 
 <template>
+    <template v-if="$route.name !== 'movie-detail'">
     <!-- 頂部兩欄：輸入區 + 統計區 -->
     <div class="top-row">
 
@@ -152,12 +165,18 @@ const addCollection = () => {
                             :class="item.rating >= i ? 'fa-solid fa-star' : 'fa-regular fa-star'">
                         </i>
                     </div>
+                    <RouterLink class="btn-more" :to="movieDetailLocation(item)">
+                        查看更多
+                    </RouterLink>
                 </div>
 
             </div>
         </div>
 
     </section>
+    </template>
+
+    <RouterView v-else />
 </template>
 
 <style>
@@ -609,45 +628,98 @@ textarea {
     transition: opacity 0.25s ease 0.1s, transform 0.25s ease 0.1s;
 }
 
+.btn-more {
+    display: block;
+    width: 100%;
+    padding: 7px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s ease 0.15s;
+    backdrop-filter: blur(4px);
+}
+
 .movie-card:hover .card-desc,
-.movie-card:hover .card-stars {
+.movie-card:hover .card-stars,
+.movie-card:hover .btn-more {
     opacity: 1;
     transform: translateY(0);
+}
+
+.btn-more:hover {
+    background: rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 255, 255, 0.65);
 }
 
 .card-stars .fa-solid  { color: var(--star); }
 .card-stars .fa-regular { color: var(--text-muted); opacity: 0.35; }
 
 @media (max-width: 768px) {
+    .movie-card {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 0;
+        cursor: default;
+    }
+
     .movie-card:hover {
         transform: none;
         box-shadow: none;
         z-index: auto;
     }
 
+    .card-img-wrap {
+        position: relative;
+        inset: auto;
+        aspect-ratio: 2 / 3;
+        flex: none;
+    }
+
     .card-img-wrap img,
     .movie-card:hover .card-img-wrap img {
-        filter: brightness(0.95);
+        filter: none;
         transform: none;
     }
 
     .card-img-wrap::after,
     .movie-card:hover .card-img-wrap::after {
-        background: linear-gradient(
-            to top,
-            rgba(0, 0, 0, 1) 0%,
-            rgba(0, 0, 0, 0.88) 34%,
-            rgba(0, 0, 0, 0.48) 58%,
-            rgba(0, 0, 0, 0.08) 78%,
-            transparent 100%
-        );
+        content: none;
+    }
+
+    .card-body {
+        position: static;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 14px 12px 12px;
+        background: var(--bg-card);
+    }
+
+    .card-title {
+        text-shadow: none;
     }
 
     .card-desc,
-    .card-stars {
+    .card-stars,
+    .btn-more {
         opacity: 1;
         transform: translateY(0);
-        text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95);
+        text-shadow: none;
+    }
+
+    .btn-more {
+        margin-top: auto;
+        backdrop-filter: none;
     }
 }
 
