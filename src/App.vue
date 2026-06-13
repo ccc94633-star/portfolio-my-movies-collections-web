@@ -152,7 +152,6 @@ const addCollection = () => {
                             :class="item.rating >= i ? 'fa-solid fa-star' : 'fa-regular fa-star'">
                         </i>
                     </div>
-                    <button type="button" class="btn-more">顯示更多</button>
                 </div>
 
             </div>
@@ -610,39 +609,44 @@ textarea {
     transition: opacity 0.25s ease 0.1s, transform 0.25s ease 0.1s;
 }
 
-.btn-more {
-    width: 100%;
-    padding: 7px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    border-radius: var(--radius-sm);
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.25s ease 0.15s;
-    backdrop-filter: blur(4px);
-}
-
 .movie-card:hover .card-desc,
-.movie-card:hover .card-stars,
-.movie-card:hover .btn-more {
+.movie-card:hover .card-stars {
     opacity: 1;
     transform: translateY(0);
 }
 
-.btn-more:hover {
-    background: rgba(255, 255, 255, 0.26);
-    border-color: rgba(255, 255, 255, 0.65);
-}
-
 .card-stars .fa-solid  { color: var(--star); }
 .card-stars .fa-regular { color: var(--text-muted); opacity: 0.35; }
+
+@media (max-width: 768px) {
+    .movie-card:hover {
+        transform: none;
+        box-shadow: none;
+        z-index: auto;
+    }
+
+    .card-img-wrap img,
+    .movie-card:hover .card-img-wrap img {
+        filter: brightness(0.55);
+        transform: none;
+    }
+
+    .card-img-wrap::after,
+    .movie-card:hover .card-img-wrap::after {
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 0.82) 50%,
+            rgba(0, 0, 0, 0.35) 100%
+        );
+    }
+
+    .card-desc,
+    .card-stars {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* ====== EMPTY STATE ====== */
 .empty-state {
