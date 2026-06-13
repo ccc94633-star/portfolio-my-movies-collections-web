@@ -153,6 +153,10 @@ const addCollection = () => {
 
                 <div class="card-img-wrap">
                     <img :src="item.imageUrl || 'no-image.svg'" :alt="item.title + '的圖片'"
+                        :class="{
+                            'focus-damong': item.title === '大濛',
+                            'focus-sunshine-choir': item.title === '陽光女子合唱團',
+                        }"
                         @error="$event.target.src='no-image.svg'">
                 </div>
 
@@ -681,14 +685,24 @@ textarea {
     .card-img-wrap {
         position: relative;
         inset: auto;
-        aspect-ratio: 2 / 3;
+        aspect-ratio: 3 / 2;
         flex: none;
     }
 
     .card-img-wrap img,
     .movie-card:hover .card-img-wrap img {
+        object-fit: cover;
+        object-position: center 25%;
         filter: none;
         transform: none;
+    }
+
+    .card-img-wrap img.focus-damong {
+        object-position: center 82%;
+    }
+
+    .card-img-wrap img.focus-sunshine-choir {
+        object-position: center 68%;
     }
 
     .card-img-wrap::after,
