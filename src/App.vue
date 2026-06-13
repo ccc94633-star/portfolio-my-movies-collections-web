@@ -1,6 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { initialMovies } from './data/initialMovies.js'
+
+const route = useRoute()
+const router = useRouter()
 
 const categoryTypes = {
     action: '動作電影',
@@ -26,7 +30,10 @@ const ratingAvg = computed(() => {
     return (sum / collection.value.length).toFixed(1)
 })
 
-const activeFilter = ref('all')
+const activeFilter = computed(() => {
+    const filter = route.query.filter
+    return typeof filter === 'string' && filter in categoryTypes ? filter : 'all'
+})
 
 const filterResults = computed(() => {
     if (activeFilter.value === 'all') return [...collection.value]
@@ -34,7 +41,15 @@ const filterResults = computed(() => {
 })
 
 const query = (categoryType) => {
-    activeFilter.value = categoryType
+    const nextQuery = { ...route.query }
+
+    if (categoryType === 'all') {
+        delete nextQuery.filter
+    } else {
+        nextQuery.filter = categoryType
+    }
+
+    router.replace({ name: 'home', query: nextQuery })
 }
 
 const movieDetailLocation = (movie) => ({
@@ -46,6 +61,7 @@ const movieDetailLocation = (movie) => ({
         shortDesc: movie.shortDesc,
         category: movie.category,
         rating: movie.rating,
+        ...(activeFilter.value !== 'all' && { filter: activeFilter.value }),
     },
 })
 
@@ -53,7 +69,7 @@ const addCollection = () => {
     collection.value.unshift({
         category: category.value,
         title: title.value,
-        imageUrl: imageUrl.value,
+        imageUrl: imageUrl.value.trim() || '/no-image.svg',
         shortDesc: shortDesc.value,
         rating: rating.value,
     })
@@ -152,12 +168,12 @@ const addCollection = () => {
             <div v-for="(item, index) in filterResults" :key="index" class="movie-card">
 
                 <div class="card-img-wrap">
-                    <img :src="item.imageUrl || 'no-image.svg'" :alt="item.title + '的圖片'"
+                    <img :src="item.imageUrl || '/no-image.svg'" :alt="item.title + '的圖片'"
                         :class="{
                             'focus-damong': item.title === '大濛',
                             'focus-sunshine-choir': item.title === '陽光女子合唱團',
                         }"
-                        @error="$event.target.src='no-image.svg'">
+                        @error="$event.target.src='/no-image.svg'">
                 </div>
 
                 <div class="card-body">

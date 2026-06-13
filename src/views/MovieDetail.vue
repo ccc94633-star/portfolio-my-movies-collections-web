@@ -5,6 +5,11 @@ import { initialMovies } from '../data/initialMovies.js'
 
 const route = useRoute()
 
+const listFilter = computed(() => {
+    const filter = route.query.filter
+    return typeof filter === 'string' ? filter : undefined
+})
+
 const categoryTypes = {
     action: '動作片',
     drama: '劇情片',
@@ -19,7 +24,7 @@ const movie = computed(() => {
 
     return {
         title: route.query.title || fallbackMovie.title || '電影詳情',
-        imageUrl: route.query.imageUrl || fallbackMovie.imageUrl || 'no-image.svg',
+        imageUrl: route.query.imageUrl || fallbackMovie.imageUrl || '/no-image.svg',
         shortDesc: route.query.shortDesc || fallbackMovie.shortDesc || '目前尚無劇情介紹。',
         category: route.query.category || fallbackMovie.category || 'other',
         rating: Number(route.query.rating ?? fallbackMovie.rating ?? 0),
@@ -43,8 +48,14 @@ const movieLocation = (item) => ({
         shortDesc: item.shortDesc,
         category: item.category,
         rating: item.rating,
+        ...(listFilter.value && { filter: listFilter.value }),
     },
 })
+
+const movieListLocation = computed(() => ({
+    name: 'home',
+    query: listFilter.value ? { filter: listFilter.value } : {},
+}))
 </script>
 
 <template>
@@ -54,7 +65,7 @@ const movieLocation = (item) => ({
                 <img
                     :src="movie.imageUrl"
                     :alt="`${movie.title} 電影海報`"
-                    @error="$event.target.src = 'no-image.svg'"
+                    @error="$event.target.src = '/no-image.svg'"
                 >
             </div>
 
@@ -88,9 +99,9 @@ const movieLocation = (item) => ({
                     :to="movieLocation(item)"
                 >
                     <img
-                        :src="item.imageUrl || 'no-image.svg'"
+                        :src="item.imageUrl || '/no-image.svg'"
                         :alt="`${item.title} 電影海報`"
-                        @error="$event.target.src = 'no-image.svg'"
+                        @error="$event.target.src = '/no-image.svg'"
                     >
                     <div class="recommendation-info">
                         <strong>{{ item.title }}</strong>
@@ -100,7 +111,7 @@ const movieLocation = (item) => ({
             </div>
 
             <div class="back-link-wrap">
-                <RouterLink class="back-link" to="/">
+                <RouterLink class="back-link" :to="movieListLocation">
                     <i class="fa-solid fa-arrow-left"></i>
                     返回電影收藏
                 </RouterLink>
