@@ -627,7 +627,7 @@ textarea {
 
     .card-img-wrap img,
     .movie-card:hover .card-img-wrap img {
-        filter: brightness(0.55);
+        filter: brightness(0.95);
         transform: none;
     }
 
@@ -636,8 +636,10 @@ textarea {
         background: linear-gradient(
             to top,
             rgba(0, 0, 0, 1) 0%,
-            rgba(0, 0, 0, 0.82) 50%,
-            rgba(0, 0, 0, 0.35) 100%
+            rgba(0, 0, 0, 0.88) 34%,
+            rgba(0, 0, 0, 0.48) 58%,
+            rgba(0, 0, 0, 0.08) 78%,
+            transparent 100%
         );
     }
 
@@ -645,6 +647,7 @@ textarea {
     .card-stars {
         opacity: 1;
         transform: translateY(0);
+        text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95);
     }
 }
 
